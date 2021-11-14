@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    
+    <div class="control-panel">
+      <button id="start" style="float: left">Start Recognition</button
+      ><button id="stop" style="float: right">Stop Recognition</button>
+    </div>
+
+    <div class="words" contenteditable="true"></div>
+
+    <script>
+      let recognition = new webkitSpeechRecognition();
+
+      recognition.interimResults = true; // 講話的當下即時辨識
+      recognition.lang = "cmn-Hant-TW"; // 要辨識的語言
+      recognition.continuous = false; // 持續辨識，不會自動結束
+
+      const words = document.querySelector(".words");
+      let p = document.createElement("p");
+      words.appendChild(p);
+
+      recognition.addEventListener("result", (e) => {
+        p.textContent = e.results[0][0].transcript;
+        if (e.results[0].isFinal) {
+          p = document.createElement("p");
+          words.appendChild(p);
+        }
+      });
+
+      /**
+       * 因為講完一段話後辨識會自動結束，因此當觸發結束事件時，我們要在啟動語音辨識
+       **/
+      recognition.addEventListener("end", (e) => {
+        recognizing ? recognition.start() : recognition.stop();
+      });
+
+      // 開始語音辨識
+      document.querySelector("#start").addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        recognizing = true;
+        recognition.start();
+      });
+
+      document.querySelector("#stop").addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        recognizing = false;
+        recognition.stop();
+      });
+    </script>
+
+    <style>
+      html {
+        font-size: 10px;
+      }
+
+      body {
+        background: #ffc600;
+        font-family: "helvetica neue";
+        font-weight: 200;
+        font-size: 20px;
+      }
+
+      .words {
+        max-width: 500px;
+        margin: 50px auto;
+        background: white;
+        border-radius: 5px;
+        box-shadow: 10px 10px 0 rgba(0, 0, 0, 0.1);
+        padding: 1rem 2rem 1rem 5rem;
+        background: -webkit-gradient(
+            linear,
+            0 0,
+            0 100%,
+            from(#d9eaf3),
+            color-stop(4%, #fff)
+          )
+          0 4px;
+        background-size: 100% 3rem;
+        position: relative;
+        line-height: 3rem;
+      }
+      p {
+        margin: 0 0 3rem;
+      }
+
+      .words:before {
+        content: "";
+        position: absolute;
+        width: 4px;
+        top: 0;
+        left: 30px;
+        bottom: 0;
+        border: 1px solid;
+        border-color: transparent #efe4e4;
+      }
+
+      .control-panel {
+        max-width: 580px;
+        margin: 60px auto 0;
+        overflow: auto;
+      }
+    </style>
+  </body>
+</html>
